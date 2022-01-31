@@ -5,6 +5,7 @@ from typing import Callable, Any, Dict, Literal, Union, Optional, List
 
 import boto3
 from aiohttp import web
+from asyncer import asyncify
 from moto import mock_sqs, mock_dynamodb2
 
 logging.basicConfig(level=logging.INFO)
@@ -136,6 +137,7 @@ class AwsSimulator:
 
     def shutdown(self):
         self.__sqs_mock.stop()
+        self.__dynamodb_mock.stop()
 
 
 class HttpLambdaSimulator:
@@ -224,11 +226,9 @@ class SqsLambdaSimulator:
             for func in self.funcs.values():
                 queue_url = self.sqs_client.get_queue_url(QueueName=func.queue_name)['QueueUrl']
                 try:
-                    messages = self.sqs_client.receive_message(
-                        QueueUrl=queue_url,
-                        MaxNumberOfMessages=1,
-                        WaitTimeSeconds=0
-                    )
+                    messages = await asyncify(self.sqs_client.receive_message)(QueueUrl=queue_url,
+                                                                               MaxNumberOfMessages=1,
+                                                                               WaitTimeSeconds=1)
                     if messages and 'Messages' in messages and len(messages['Messages']) > 0:
                         records = [
                             Record(messageId=msg['MessageId'], receiptHandle=msg['ReceiptHandle'], body=msg['Body'],
@@ -240,7 +240,30 @@ class SqsLambdaSimulator:
                             self.sqs_client.delete_message(QueueUrl=queue_url, ReceiptHandle=msg['ReceiptHandle'])
                 except KeyboardInterrupt:
                     break
-            await asyncio.sleep(1)
 
     def stop(self):
         self.is_started = False
+
+
+class Simulator:
+
+    def __init__(self):
+        self.sqs = SqsLambdaSimulator()
+        self.http = HttpLambdaSimulator()
+
+    def add_func(self, func: Union[LambdaSqsFunc, LambdaPureHttpFunc, LambdaHttpFunc]):
+        if type(func) == LambdaSqsFunc:
+            self.sqs.add_func(func)
+        elif type(func) == LambdaHttpFunc or type(func) == LambdaPureHttpFunc:
+            self.http.add_func(func)
+
+    def remove_func(self, name: str):
+        self.sqs.remove_func(name)
+        self.http.remove_func(name)
+
+    async def start(self):
+        return asyncio.gather(self.sqs.start(), self.http.start())
+
+    async def stop(self):
+        self.sqs.stop()
+        await self.http.stop()
