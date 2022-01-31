@@ -1,73 +1,17 @@
 import asyncio
 import logging
 from dataclasses import dataclass
-from typing import Callable, Any, Dict, Literal, Union, Optional, List
+from typing import Callable, Any, Dict, Literal, Union
 
 import boto3
 from aiohttp import web
 from asyncer import asyncify
 from moto import mock_sqs, mock_dynamodb2
 
+from src.lambda_events import RequestContext, ApiGatewayProxyEvent, Record, SqsEvent
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class Identity:
-    caller: str
-    user: str
-    apiKey: str
-    userArn: str
-    cognitoAuthenticationType: str
-    userAgent: str
-    cognitoIdentityPoolId: str
-    cognitoAuthenticationProvider: str
-    sourceIp: str
-    accountId: str
-    cognitoIdentityId: str
-
-
-@dataclass
-class RequestContext:
-    stage: str
-    identity: Optional[Identity]
-    resourceId: str
-    apiId: str
-    resourcePath: str
-    httpMethod: str
-    requestId: str
-    accountId: str
-
-
-@dataclass
-class ApiGatewayProxyEvent:
-    body: Optional[Dict]
-    resource: str
-    path: str
-    headers: Dict[str, str]
-    requestContext: RequestContext
-    queryStringParameters: Dict[str, str]
-    pathParameters: Dict[str, str]
-    httpMethod: str
-    stageVariables: Dict[str, str]
-
-
-@dataclass
-class Record:
-    messageId: str
-    receiptHandle: str
-    body: str
-    attributes: Dict[str, str]
-    messageAttributes: Dict[str, str]
-    md5OfBody: str
-    eventSource: str
-    eventSourceARN: str
-    awsRegion: str
-
-
-@dataclass
-class SqsEvent:
-    Records: List[Record]
 
 
 @dataclass

@@ -3,8 +3,9 @@ import asyncio
 import boto3
 import pytest
 
-from src.lambda_simulator import SqsLambdaSimulator, LambdaSqsFunc, HttpLambdaSimulator, \
-    LambdaHttpFunc, LambdaPureHttpFunc, ApiGatewayProxyEvent, SqsEvent, AwsSimulator
+from src.py_lambda_simulator import SqsLambdaSimulator, LambdaSqsFunc, HttpLambdaSimulator, \
+    LambdaHttpFunc, LambdaPureHttpFunc, AwsSimulator
+from src.lambda_events import ApiGatewayProxyEvent, SqsEvent
 
 import json
 
