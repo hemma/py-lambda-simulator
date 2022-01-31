@@ -3,6 +3,12 @@ name = "lambda-simulator"
 version = "0.1.0"
 description = ""
 authors = ["Johan Bothin <johan.bothin@gmail.com>"]
+license = "MIT"
+homepage = "https://github.com/hemma/py-lambda-simulator"
+repository = "https://github.com/hemma/py-lambda-simulator"
+include = [
+    "LICENSE",
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
