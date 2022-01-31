@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "lambda-simulator"
+name = "py-lambda-simulator"
 version = "0.1.0"
 description = ""
 authors = ["Johan Bothin <johan.bothin@gmail.com>"]
