@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, TypedDict
 
 
 @dataclass
@@ -42,8 +42,7 @@ class ApiGatewayProxyEvent:
     stageVariables: Dict[str, str]
 
 
-@dataclass
-class Record:
+class Record(TypedDict):
     messageId: str
     receiptHandle: str
     body: str
@@ -55,6 +54,5 @@ class Record:
     awsRegion: str
 
 
-@dataclass
-class SqsEvent:
+class SqsEvent(TypedDict):
     Records: List[Record]

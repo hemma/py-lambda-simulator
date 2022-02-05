@@ -152,7 +152,7 @@ class TestSqsLambdaSimulator:
         queue = aws_simulator.create_sqs_queue('queue-name')
 
         def sqs_handler(event: SqsEvent, context):
-            assert json.loads(event.Records[0].body) == {'test': 123}
+            assert json.loads(event["Records"][0]["body"]) == {'test': 123}
             simulator.stop()
 
         simulator.add_func(LambdaSqsFunc(name='test-sqs-lambda', queue_name='queue-name', handler_func=sqs_handler))
@@ -170,10 +170,10 @@ class TestSqsLambdaSimulator:
         queue_2 = aws_simulator.create_sqs_queue('queue-name-2')
 
         def sqs_handler_1(event: SqsEvent, context):
-            assert json.loads(event.Records[0].body) == {'test': 123}
+            assert json.loads(event["Records"][0]["body"]) == {'test': 123}
 
         def sqs_handler_2(event: SqsEvent, context):
-            assert json.loads(event.Records[0].body) == {'test': 321}
+            assert json.loads(event["Records"][0]["body"]) == {'test': 321}
             simulator.stop()
 
         simulator.add_func(
@@ -201,7 +201,7 @@ class TestSqsLambdaSimulator:
             sqs_client.send_message(QueueUrl=queue_2['queue_url'], MessageBody=json.dumps({'test': 'from_sqs_1'}))
 
         def sqs_handler_2(event: SqsEvent, context):
-            assert json.loads(event.Records[0].body) == {'test': 'from_sqs_1'}
+            assert json.loads(event["Records"][0]["body"]) == {'test': 'from_sqs_1'}
             simulator.stop()
 
         simulator.add_func(
@@ -231,7 +231,7 @@ class TestLambdaSimulator:
         has_been_called = {'sqs': False, 'http': False}
 
         def sqs_handler(event: SqsEvent, context):
-            assert json.loads(event.Records[0].body) == {'test': 123}
+            assert json.loads(event["Records"][0]["body"]) == {'test': 123}
             sqs_simulator.stop()
             has_been_called['sqs'] = True
 
