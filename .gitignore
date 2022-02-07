@@ -1,3 +1,5 @@
 /example
 /dist
 /.idea
+.coverage
+__pycache__

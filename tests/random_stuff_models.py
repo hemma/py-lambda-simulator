@@ -12,8 +12,10 @@ def _check_fields(item: Dict, cls):
     for k, v in item.items():
         normalized_key = _normalize_key(k)
         if normalized_key not in cls.__dataclass_fields__:
-            warnings.warn(f"Found field \"{k}\" in input, which is not part of dataclass \"{cls.__name__}\"",
-                          RuntimeWarning)
+            warnings.warn(
+                f'Found field "{k}" in input, which is not part of dataclass "{cls.__name__}"',
+                RuntimeWarning,
+            )
         else:
             out[normalized_key] = v
     return out
@@ -64,9 +66,18 @@ class Identity(GenericDataClass):
     accountId: InitVar[str] = field(repr=False, default=None)
     cognitoIdentityId: InitVar[str] = field(repr=False, default=None)
 
-    def __post_init__(self, apiKey: str, userArn: str, cognitoAuthenticationType: str, userAgent: str,
-                      cognitoIdentityPoolId: str, cognitoAuthenticationProvider: str, sourceIp: str, accountId: str,
-                      cognitoIdentityId: str):
+    def __post_init__(
+        self,
+        apiKey: str,
+        userArn: str,
+        cognitoAuthenticationType: str,
+        userAgent: str,
+        cognitoIdentityPoolId: str,
+        cognitoAuthenticationProvider: str,
+        sourceIp: str,
+        accountId: str,
+        cognitoIdentityId: str,
+    ):
         self.api_key = apiKey
         self.user_arn = userArn
         self.user_agent = userAgent
@@ -95,8 +106,15 @@ class RequestContext(GenericDataClass):
     requestId: InitVar[str] = field(repr=False, default=None)
     accountId: InitVar[str] = field(repr=False, default=None)
 
-    def __post_init__(self, resourceId: str, apiId: str, resourcePath: str, httpMethod: str, requestId: str,
-                      accountId: str):
+    def __post_init__(
+        self,
+        resourceId: str,
+        apiId: str,
+        resourcePath: str,
+        httpMethod: str,
+        requestId: str,
+        accountId: str,
+    ):
         self.request_id = requestId
         self.resource_id = resourceId
         self.resource_path = resourcePath
@@ -123,13 +141,20 @@ class ApiGwProxyEvent(EventClass):
     httpMethod: InitVar[str] = field(repr=False, default=None)
     stageVariables: InitVar[str] = field(repr=False, default=None)
 
-    def __post_init__(self, requestContext: str, queryStringParameters: str, pathParameters: str, httpMethod: str,
-                      stageVariables: str):
+    def __post_init__(
+        self,
+        requestContext: str,
+        queryStringParameters: str,
+        pathParameters: str,
+        httpMethod: str,
+        stageVariables: str,
+    ):
         self.request_context = RequestContext.from_json(requestContext)
         self.query_string_parameters = queryStringParameters
         self.path_parameters = pathParameters
         self.http_method = httpMethod
         self.stage_variables = stageVariables
+
 
 # @dataclass
 # class S3Object(GenericDataClass):

@@ -13,20 +13,19 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class LambdaPureHttpFunc(LambdaConfig):
-    method: Literal['GET', 'POST']
+    method: Literal["GET", "POST"]
     path: str
     handler_func: Callable[[Any, Any], None]
 
 
 @dataclass
 class LambdaHttpFunc(LambdaConfig):
-    method: Literal['GET', 'POST']
+    method: Literal["GET", "POST"]
     path: str
     handler_func: Callable[[ApiGatewayProxyEvent, Any], Any]
 
 
 class HttpLambdaSimulator:
-
     def __init__(self):
         self.app = web.Application()
         self.runner = None
@@ -45,28 +44,38 @@ class HttpLambdaSimulator:
 
             def add(f):
                 async def __lambda_func_http(request):
-                    if request.has_body:
+                    if request.can_read_body:
                         body = await request.json()
                     else:
                         body = None
 
                     if type(f) == LambdaHttpFunc:
-                        event = ApiGatewayProxyEvent(body=body, resource="resource", path=request.rel_url,
-                                                     headers=request.headers,
-                                                     requestContext=RequestContext(stage="stage", identity=None,
-                                                                                   resourceId="resId",
-                                                                                   apiId="apiId",
-                                                                                   resourcePath=request.rel_url,
-                                                                                   httpMethod=request.method,
-                                                                                   requestId="reqId",
-                                                                                   accountId="accId"),
-                                                     queryStringParameters={},
-                                                     pathParameters={}, httpMethod=request.method,
-                                                     stageVariables={})
+                        event = ApiGatewayProxyEvent(
+                            body=body,
+                            resource="resource",
+                            path=request.rel_url,
+                            headers=request.headers,
+                            requestContext=RequestContext(
+                                stage="stage",
+                                identity=None,
+                                resourceId="resId",
+                                apiId="apiId",
+                                resourcePath=request.rel_url,
+                                httpMethod=request.method,
+                                requestId="reqId",
+                                accountId="accId",
+                            ),
+                            queryStringParameters={},
+                            pathParameters={},
+                            httpMethod=request.method,
+                            stageVariables={},
+                        )
                         lambda_response = f.handler_func(event, {})
-                        return web.Response(status=lambda_response["statusCode"],
-                                            headers=lambda_response.get("headers"),
-                                            body=lambda_response.get("body"))
+                        return web.Response(
+                            status=lambda_response["statusCode"],
+                            headers=lambda_response.get("headers"),
+                            body=lambda_response.get("body"),
+                        )
                     elif type(f) == LambdaPureHttpFunc:
                         f.handler_func({}, {})
                         return web.Response(status=200)
@@ -82,7 +91,7 @@ class HttpLambdaSimulator:
 
         self.runner = web.AppRunner(self.app)
         await self.runner.setup()
-        site = web.TCPSite(self.runner, 'localhost', 8080)
+        site = web.TCPSite(self.runner, "localhost", 8080)
         await site.start()
 
     async def stop(self):

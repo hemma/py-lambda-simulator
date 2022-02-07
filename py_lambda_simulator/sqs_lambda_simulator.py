@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 class LambdaSqsFunc(LambdaConfig):
     queue_name: str
     handler_func: Callable[[SqsEvent, Any], None]
+    max_number_of_messages: int = 1
 
 
 class SqsLambdaSimulator:
-
     def __init__(self):
-        self.sqs_client = boto3.client('sqs')
+        self.sqs_client = boto3.client("sqs")
         self.funcs: Dict[str, LambdaSqsFunc] = {}
         self.is_started = False
 
@@ -36,21 +36,41 @@ class SqsLambdaSimulator:
     async def start(self):
         self.is_started = True
         while self.is_started:
-            for func in self.funcs.values():
-                queue_url = self.sqs_client.get_queue_url(QueueName=func.queue_name)['QueueUrl']
+            for name, func in self.funcs.items():
+                queue_url = self.sqs_client.get_queue_url(QueueName=func.queue_name)[
+                    "QueueUrl"
+                ]
                 try:
-                    messages = await asyncify(self.sqs_client.receive_message)(QueueUrl=queue_url,
-                                                                               MaxNumberOfMessages=1,
-                                                                               WaitTimeSeconds=1)
-                    if messages and 'Messages' in messages and len(messages['Messages']) > 0:
+                    messages = await asyncify(self.sqs_client.receive_message)(
+                        QueueUrl=queue_url,
+                        MaxNumberOfMessages=func.max_number_of_messages,
+                        WaitTimeSeconds=1,
+                    )
+                    if (
+                        messages
+                        and "Messages" in messages
+                        and len(messages["Messages"]) > 0
+                    ):
                         records = [
-                            Record(messageId=msg['MessageId'], receiptHandle=msg['ReceiptHandle'], body=msg['Body'],
-                                   attributes={}, messageAttributes={},
-                                   md5OfBody=msg['MD5OfBody'], eventSource="sqs?", eventSourceARN="sqsArn?",
-                                   awsRegion="region?") for msg in messages['Messages']]
+                            Record(
+                                messageId=msg["MessageId"],
+                                receiptHandle=msg["ReceiptHandle"],
+                                body=msg["Body"],
+                                attributes={},
+                                messageAttributes={},
+                                md5OfBody=msg["MD5OfBody"],
+                                eventSource="sqs?",
+                                eventSourceARN="sqsArn?",
+                                awsRegion="region?",
+                            )
+                            for msg in messages["Messages"]
+                        ]
+                        logger.info(f"Invoking {name}")
                         func.handler_func(SqsEvent(Records=records), {})
-                        for msg in messages['Messages']:
-                            self.sqs_client.delete_message(QueueUrl=queue_url, ReceiptHandle=msg['ReceiptHandle'])
+                        for msg in messages["Messages"]:
+                            self.sqs_client.delete_message(
+                                QueueUrl=queue_url, ReceiptHandle=msg["ReceiptHandle"]
+                            )
                 except KeyboardInterrupt:
                     break
 
