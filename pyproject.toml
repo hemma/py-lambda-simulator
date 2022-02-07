@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "py-lambda-simulator"
-version = "0.1.5"
+version = "0.1.6"
 description = ""
 authors = ["Johan Bothin <johan.bothin@gmail.com>"]
 license = "MIT"
+readme = "README.md"
 homepage = "https://github.com/hemma/py-lambda-simulator"
 repository = "https://github.com/hemma/py-lambda-simulator"
 include = [
