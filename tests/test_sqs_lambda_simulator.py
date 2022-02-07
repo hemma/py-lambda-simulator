@@ -18,15 +18,9 @@ async def test_should_invoke_lambda_func_on_message():
         assert json.loads(event["Records"][0]["body"]) == {"test": 123}
         simulator.stop()
 
-    simulator.add_func(
-        LambdaSqsFunc(
-            name="test-sqs-lambda", queue_name="queue-name", handler_func=sqs_handler
-        )
-    )
+    simulator.add_func(LambdaSqsFunc(name="test-sqs-lambda", queue_name="queue-name", handler_func=sqs_handler))
 
-    aws_simulator.get_sqs_client().send_message(
-        QueueUrl=queue["queue_url"], MessageBody=json.dumps({"test": 123})
-    )
+    aws_simulator.get_sqs_client().send_message(QueueUrl=queue["queue_url"], MessageBody=json.dumps({"test": 123}))
 
     await simulator.start()
     aws_simulator.shutdown()
@@ -51,12 +45,8 @@ async def test_should_invoke_lambda_func_with_batch_of_msgs():
         )
     )
 
-    aws_simulator.get_sqs_client().send_message(
-        QueueUrl=queue["queue_url"], MessageBody=json.dumps({"test": 123})
-    )
-    aws_simulator.get_sqs_client().send_message(
-        QueueUrl=queue["queue_url"], MessageBody=json.dumps({"test": 123})
-    )
+    aws_simulator.get_sqs_client().send_message(QueueUrl=queue["queue_url"], MessageBody=json.dumps({"test": 123}))
+    aws_simulator.get_sqs_client().send_message(QueueUrl=queue["queue_url"], MessageBody=json.dumps({"test": 123}))
 
     await simulator.start()
     aws_simulator.shutdown()
@@ -91,12 +81,8 @@ async def test_should_invoke_multiple_lambdas():
         )
     )
 
-    aws_simulator.get_sqs_client().send_message(
-        QueueUrl=queue_1["queue_url"], MessageBody=json.dumps({"test": 123})
-    )
-    aws_simulator.get_sqs_client().send_message(
-        QueueUrl=queue_2["queue_url"], MessageBody=json.dumps({"test": 321})
-    )
+    aws_simulator.get_sqs_client().send_message(QueueUrl=queue_1["queue_url"], MessageBody=json.dumps({"test": 123}))
+    aws_simulator.get_sqs_client().send_message(QueueUrl=queue_2["queue_url"], MessageBody=json.dumps({"test": 321}))
 
     await simulator.start()
     aws_simulator.shutdown()
@@ -135,9 +121,7 @@ async def test_should_invoke_lambda_from_lambda():
         )
     )
 
-    aws_simulator.get_sqs_client().send_message(
-        QueueUrl=queue_1["queue_url"], MessageBody=json.dumps({"test": 123})
-    )
+    aws_simulator.get_sqs_client().send_message(QueueUrl=queue_1["queue_url"], MessageBody=json.dumps({"test": 123}))
 
     await simulator.start()
     aws_simulator.shutdown()

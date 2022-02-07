@@ -85,18 +85,14 @@ class TestLambdaSimulator:
             )
         )
 
-        aws_simulator.get_sqs_client().send_message(
-            QueueUrl=queue["queue_url"], MessageBody=json.dumps({"test": 123})
-        )
+        aws_simulator.get_sqs_client().send_message(QueueUrl=queue["queue_url"], MessageBody=json.dumps({"test": 123}))
 
         async def call_http_lambda():
             resp = await client.post("/http")
             assert resp.status == 200
             await http_simulator.stop()
 
-        await asyncio.gather(
-            sqs_simulator.start(), http_simulator.start(), call_http_lambda()
-        )
+        await asyncio.gather(sqs_simulator.start(), http_simulator.start(), call_http_lambda())
 
         assert has_been_called["sqs"]
         assert has_been_called["http"]
